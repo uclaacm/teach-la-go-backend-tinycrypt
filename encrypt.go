@@ -53,7 +53,7 @@ func (e *Encrypter) Encrypt36(plain uint64) (uint64){
 }
 
 func F24(b, k uint64) (uint64){
-	return b + (k ^ (b << 6)) + (k ^ (b << 12)) + (k ^ (b << 18)) 
+	return b + (k ^ (b << 3)) + (k ^ (b << 5)) + (k ^ (b << 19)) + (k ^ (b << 21)) + (k ^ (b << 23)) + 10000439  
 }
 
 func Swap24(i uint64) (uint64){

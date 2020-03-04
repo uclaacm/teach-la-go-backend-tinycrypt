@@ -1,18 +1,19 @@
-package tinycrypt_test
+package tinycrypt
 
 import (
 	"testing"
-	"./tinycrypt"
 )
 
 func TestEncrypt(t *testing.T) {
 
-	var en tinycrypt.Encrypter
-	var de tinycrypt.Encrypter
+	var en Encrypter
+	var de Encrypter
 
 	keys := []uint64 {
 		0x33684192D,
 		0x28DAB6A5A,
+		0xA928A9246,
+		0x224D23A42,
 	}
 
 	keys_rev := []uint64 {
