@@ -52,6 +52,31 @@ func (e *Encrypter) Encrypt36(plain uint64) (uint64){
 
 }
 
+func F24(b, k uint64) (uint64){
+	return b + (k ^ (b << 6)) + (k ^ (b << 12)) + (k ^ (b << 18)) 
+}
+
+func Swap24(i uint64) (uint64){
+	return ((i & 0xFFF) << 12) | (0xFFF000 & i) >> 12
+}
+
+func (e *Encrypter) Encrypt24(plain uint64) (uint64){
+
+		var r, l uint64
+
+		for _, k := range e.Key {
+			// Get the rightmost 18 bits 
+			r = uint64(0xFFF) & plain
+			// get the leftmost 18 bits 
+			l = (uint64(0xFFF000) & plain) 
+			// Use key to perform conversion
+			plain = Swap24((l ^ ((F24(r, k) << 12) & 0xFFFFFF)) | r)
+		}
+		// Since we swap N-1 times, we need to "cancel out" the last swap 
+		return Swap24(plain)
+
+}
+
 // ======================
 // Handlers for encrypting 8 bit data
 // ======================
