@@ -170,6 +170,24 @@ func GenerateWord36(plain uint64) ([]string){
 	return words
 }
 
+// GenerateWord36 takes a 24 bit unsigned integer and creates 
+// human friendly hashes
+func GenerateWord24(plain uint64) ([]string){
+
+	id := uint16(0)
+	mask := uint64(0xFFF) //12 bits
+
+	words := []string{}
+	
+	for i := 0; i < 2; i++{
+
+		id = uint16(plain & mask) 
+		words = append(words, Words[id])
+		plain = plain >> 12
+	}
+
+	return words
+}
 
 // MakeHash is a helper funciton that takes a 120 bit id (20 char) and makes a 36 bit id
 // Make sure the char is UTF-8
