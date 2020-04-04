@@ -6,7 +6,7 @@ import (
 
 // https://en.wikipedia.org/wiki/Feistel_cipher
 // Note: Perhaps that simplist way to implement this package will be to use 
-// Knuth's Multiplicative Method. However this will require us to have a 128 bit,
+// Knuth's Multiplicative Method. However this will require us to have a 128 bit integer,
 // which ends up making implementation complex. 
 // This method is more convoluted, but only requires bitwise operations and 64 bit ints
 
@@ -18,12 +18,16 @@ type Encrypter struct{
 }
 
 
-// InitializeEncrypter is a function to initialize the Encrypter with 
-// a list of keys. 
+// InitializeEncrypter is a function to initialize the Encrypter with a list of keys. 
 // Input: list of uint64 keys
 func (e *Encrypter) InitializeEncrypter(key []uint64) {
 	e.Key = key
 }
+
+
+// ======================
+// Handlers for encrypting 36 bit data
+// ======================
 
 // F is a function that takes a key and data, and generates a hash
 // F does not have to be inverseable
@@ -31,10 +35,13 @@ func F36(b, k uint64) (uint64){
 	return b + (k ^ (b << 2)) + (k ^ (b << 4)) + (k ^ (b << 8)) + (k ^ (b << 16)) + (k ^ (b << 32))
 }
 
+// Swap36 swaps the lower and upper 18 bits of the data
 func Swap36(i uint64) (uint64){
 	return ((i & 0x3FFFF) << 18) | (0xFFFFC0000 & i) >> 18 
 }
 
+// Encrypt 36 combines the key stored in the Encrypter struct 
+// with an integer and uses it to generate a unique hash, which is also a 36 bit unsigned int
 func (e *Encrypter) Encrypt36(plain uint64) (uint64){
 
 		var r, l uint64
@@ -51,6 +58,10 @@ func (e *Encrypter) Encrypt36(plain uint64) (uint64){
 		return Swap36(plain)
 
 }
+
+// ======================
+// Handlers for encrypting 24 bit data
+// ======================
 
 func F24(b, k uint64) (uint64){
 	return b + (k ^ (b << 3)) + (k ^ (b << 5)) + (k ^ (b << 19)) + (k ^ (b << 21)) + (k ^ (b << 23)) + 10000439  
@@ -92,10 +103,10 @@ func (e *Encrypter) Encrypt8(plain uint8) (uint8){
 }
 
 // ======================
-// Handlers for creating a plain engligh word hash
+// Handlers for generating hashes based on uid
 // ======================
 
-// MakeHash is a helper funciton that takes a 120 bit id (20 char) and makes a 36 bit id
+// MakeHash is a helper function that takes a 120 bit id (20 char) and makes a 36 bit id
 // Make sure the char is UTF-8
 func MakeHash(uid string) (uint64) {
 	
@@ -114,7 +125,7 @@ func MakeHash(uid string) (uint64) {
 		// get 2 chars 
 		mixer := uid[i*3 + 1: i*3 + 3] 
 
-		// intialize index
+		// initialize index
 		m_index = 0
 		// for each char in mixer
 		for _, m := range mixer{
@@ -135,9 +146,8 @@ func MakeHash(uid string) (uint64) {
 
 }
 
-// CharToInt converts a characetr [a~zA~Z0~9] 
+// CharToInt converts a character [a~zA~Z0~9] 
 // into a integer [0, 61]
-
 func CharToInt(c rune) (uint64){
 	//if this is a number (0 ~ 9)
 		if c >= 0x0030 && c <= 0x0039 {
@@ -151,8 +161,12 @@ func CharToInt(c rune) (uint64){
 		}
 }
 
-// GenerateWord36 takes a 36 bit unsigned integer and creates 
-// human friendly hashes
+
+// ======================
+// Handlers to perform the final conversion from integer to words
+// ======================
+
+// GenerateWord36 takes a 36 bit unsigned integer and converts it to a wid with 3 words
 func GenerateWord36(plain uint64) ([]string){
 
 	id := uint16(0)
@@ -170,8 +184,8 @@ func GenerateWord36(plain uint64) ([]string){
 	return words
 }
 
-// GenerateWord36 takes a 24 bit unsigned integer and creates 
-// human friendly hashes
+// GenerateWord24 id the same as GenerateWord36, 
+// except it takes a 24 bit integer and produces a wid with 2 words
 func GenerateWord24(plain uint64) ([]string){
 
 	id := uint16(0)
@@ -189,8 +203,7 @@ func GenerateWord24(plain uint64) ([]string){
 	return words
 }
 
-// MakeHash is a helper funciton that takes a 120 bit id (20 char) and makes a 36 bit id
-// Make sure the char is UTF-8
+// MakeHash is a helper function that generates a 36-bit unsigned random integer
 func GenerateHash() (uint64) {
 	return rand.Uint64() & 0x0000000FFFFFFFFF
 }
